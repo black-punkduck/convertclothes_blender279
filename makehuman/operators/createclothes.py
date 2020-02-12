@@ -78,23 +78,34 @@ class MHC_OT_CreateClothesOperator(bpy.types.Operator):
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
-        (b, info, error) = checkSanityClothes(clothesObj, humanObj)
-        if b:
-            bpy.ops.info.infobox('INVOKE_DEFAULT', title="Check Clothes", info=info, error=error)
-            return {'FINISHED'}
-
+        #
+        # create filename and check if already existent
         subdir = context.scene.MHClothesDestination
         rootDir = getClothesRoot(subdir)
         name = clothesObj.MhClothesName
+
+        filename = os.path.join(rootDir,name)
+        if context.scene.MHOverwrite is False and os.path.isdir(filename):
+            bpy.ops.info.warningbox('INVOKE_DEFAULT', title="This path is already existent, to overwrite change common settings of MakeClothes", info=filename)
+            self.report({'ERROR'}, "no clothes created.")
+            return {'FINISHED'}
+
+        (b, info, error) = checkSanityClothes(clothesObj, humanObj)
+        if b:
+            bpy.ops.info.infobox('INVOKE_DEFAULT', title="Check Clothes", info=info, error=error)
+            self.report({'ERROR'}, "no clothes created.")
+            return {'FINISHED'}
+
         desc = clothesObj.MhClothesDesc
         license = context.scene.MhClothesLicense
         author =  context.scene.MhClothesAuthor
+
 
         mc = MakeClothes(clothesObj, humanObj, exportName=name, exportRoot=rootDir, license=license, author=author, description=desc, context=context)
         (b, hint) = mc.make()
         if b is False:
             self.report({'ERROR'}, hint)
         else:
-            self.report({'INFO'}, "Clothes were written to " + os.path.join(rootDir,name))
+            self.report({'INFO'}, "Clothes were written to " + filename)
         return {'FINISHED'}
 
