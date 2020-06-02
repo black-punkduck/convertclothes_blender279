@@ -14,6 +14,7 @@ _licenses.append(("CC-BY", "CC-BY", "Creative Commons Attribution",             
 _licenses.append(("AGPL",  "AGPL", "Affero Gnu Public License (don't use unless absolutely necessary)",     3))
 _licenseDescription = "Set an output license for the clothes. This will have no practical effect apart from being included in the written MHCLO file."
 
+_blendDescription = "Select human from blendfile"
 _tagsDescription = "Select Tags for MakeHuman"
 _tagsDescriptionAdd = "Enter Tags for MakeHuman, separate by comma"
 
@@ -31,6 +32,34 @@ _destination.append(("tongue", "tongue", "Tongue subdir", 6))
 _destination_description = "This is the subdirectory (under data) where we should put the produced clothes"
 
 mh_tags = {}
+mh_readitem = []
+
+def enumlist_meshes(self, context):
+    """Populate Mesh list"""
+    scene = context.scene
+    #
+    # do that once, otherwise we will read this file again and again!
+    # 
+    global mh_readitem
+
+    if len(mh_readitem) ==  0:
+        cnt = 0
+        blendpath = os.path.join(os.path.dirname(__file__), "humans")
+        if os.path.isdir(blendpath):
+            for filename in os.listdir(blendpath):
+                if filename.endswith(".blend"):
+                    filepath = os.path.join(blendpath, filename)
+
+                    with bpy.data.libraries.load(filepath) as (data_from, data_to):
+                        for obj in data_from.objects:
+                            if obj.startswith("mh_"):
+                                item = filename[:-6] + "-" + obj[3:]
+                                load = os.path.join(filepath,obj)
+                                mh_readitem.append((load, item, ""))
+                                cnt += 1
+        if cnt == 0:    # append dummy entry
+            mh_readitem.append(("---", "---", ""))
+    return mh_readitem
 
 def extraProperties():
     #
@@ -65,6 +94,7 @@ def extraProperties():
             mh_tags[group].append((item, disp, com, cnt))   # create entry
             cnt += 1
 
+    bpy.types.Scene.MH_predefinedMeshes = bpy.props.EnumProperty(items=enumlist_meshes, name="Human", description=_blendDescription)
     bpy.types.Scene.MHTags_gender = bpy.props.EnumProperty(items=mh_tags["gender"], name="Gender", description=_tagsDescription, default=mh_sel["gender"])
     bpy.types.Scene.MHTags_dresscode = bpy.props.EnumProperty(items=mh_tags["dresscode"], name="Dress code", description=_tagsDescription, default=mh_sel["dresscode"])
     bpy.types.Scene.MHTags_activity = bpy.props.EnumProperty(items=mh_tags["activity"], name="Activity", description=_tagsDescription, default=mh_sel["activity"])
