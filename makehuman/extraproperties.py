@@ -110,6 +110,8 @@ def extraProperties():
     # Object properties, normally set by MPFB
     if not hasattr(bpy.types.Object, "MhObjectType"):
         bpy.types.Object.MhObjectType = StringProperty(name="Object type", description="This is what type of MakeHuman object is (such as Clothes, Eyes...)", default="")
+    if not hasattr(bpy.types.Object, "MhPrimaryTargetName"):
+        bpy.types.Object.MhPrimaryTargetName  = StringProperty(name="Target name", description="name will be used as a default for primary target and file name", default="primary_target")
     if not hasattr(bpy.types.Object, "MhClothesName"):
         bpy.types.Object.MhClothesName = StringProperty(name="Cloth name", description="Name of the piece of cloth. Also used to create the filename", default="newcloth")
     if not hasattr(bpy.types.Object, "MhClothesDesc"):
