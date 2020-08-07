@@ -3,6 +3,13 @@
 
 #  Author: Joel Palmius
 
+# layout:
+#
+# [preferences/common-settings]
+# [get & check human]
+# [get & check clothes]
+# [create clothes]
+
 import bpy
 
 class MHC_PT_MakeClothesPanel(bpy.types.Panel):
@@ -22,21 +29,29 @@ class MHC_PT_MakeClothesPanel(bpy.types.Panel):
                 if obj.MhObjectType == "Basemesh":
                     base_available = True
                     if  obj.data.shape_keys is not None:
-                            shape_keys = True
+                        shape_keys = True
                     break
 
         obj = context.active_object
 
-        setupBox = layout.box()
-        setupBox.label(text="Setup clothes mesh", icon="MESH_DATA")
-        setupBox.operator("makeclothes.mark_as_clothes", text="Mark as clothes")
+        # common settings (always displayed)
+        #
+        commonSettingsBox = layout.box()
+        commonSettingsBox.label(text="Common settings", icon="PREFERENCES")
+        col = commonSettingsBox.column()
+        row = col.row()
+        row.prop(scn, 'MHOverwrite', text="Overwrite existent files")
+        row = col.row()
+        row.prop(scn, 'MHAllowMods', text="Allow modifiers")
+        row = col.row()
+        row.label(text="License")
+        row.prop(scn, 'MhClothesLicense', text="")
+        row = col.row()
+        row.label(text="Author")
+        row.prop(scn, 'MhClothesAuthor', text="")
 
-        setupBox.label(text="Vertex group as clothes:")
-        setupBox.operator("makeclothes.extract_clothes", text="Extract clothes")
-
-        setupBox.label(text="Edit existent clothes:")
-        setupBox.operator("makeclothes.import_mhclo", text="Import clothes file")
-
+        # get and check human
+        #
         humanBox = layout.box()
         humanBox.label(text="Human", icon="MESH_DATA")
         if not base_available:
@@ -51,26 +66,26 @@ class MHC_PT_MakeClothesPanel(bpy.types.Panel):
         if  shape_keys:
             humanBox.operator("makeclothes.apply_shapekeys", text="Apply targets")
 
-        checkBox = layout.box()
-        checkBox.label(text="Check clothes", icon="MESH_DATA")
-        checkBox.operator("makeclothes.check_clothes", text="Check clothes")
+        # get and check clothes (same order as human)
+        #
+        setupBox = layout.box()
+        setupBox.label(text="Clothes", icon="MESH_DATA")
 
-        commonSettingsBox = layout.box()
-        commonSettingsBox.label(text="Common settings", icon="TRIA_RIGHT")
-        col = commonSettingsBox.column()
-        row = col.row()
-        row.prop(scn, 'MHOverwrite', text="Overwrite existent files")
-        row = col.row()
-        row.prop(scn, 'MHAllowMods', text="Allow modifiers")
-        row = col.row()
-        row.label(text="License")
-        row.prop(scn, 'MhClothesLicense', text="")
-        row = col.row()
-        row.label(text="Author")
-        row.prop(scn, 'MhClothesAuthor', text="")
+        setupBox.label(text="Vertex group as clothes:")
+        setupBox.operator("makeclothes.extract_clothes", text="Extract clothes")
 
+        setupBox.label(text="Edit existent clothes:")
+        setupBox.operator("makeclothes.import_mhclo", text="Import clothes file")
+
+        setupBox.operator("makeclothes.mark_as_clothes", text="Mark as clothes")
+
+        setupBox.operator("makeclothes.check_clothes", text="Check clothes")
+
+
+        # the procedure itself
+        #
         produceBox = layout.box()
-        produceBox.label(text="Produce clothes", icon="MESH_DATA")
+        produceBox.label(text="Produce clothes", icon="MOD_CLOTH")
         if obj is None or obj.type != "MESH":
             produceBox.label(text="- select a visible mesh object -")
         else:
