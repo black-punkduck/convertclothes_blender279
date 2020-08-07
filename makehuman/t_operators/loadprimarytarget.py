@@ -49,7 +49,8 @@ class MHC_OT_LoadPrimaryTargetOperator(bpy.types.Operator, ImportHelper):
                     x = float(parts[1]) * scaleFactor
                     z = float(parts[2]) * scaleFactor
                     y = -float(parts[3]) * scaleFactor
-                    if index < mx:
+
+                    if index < mx:      # avoid target for helpers to get in conflict if only body is loaded
                         pt.data[index].co[0] = pt.data[index].co[0] + x
                         pt.data[index].co[1] = pt.data[index].co[1] + y
                         pt.data[index].co[2] = pt.data[index].co[2] + z

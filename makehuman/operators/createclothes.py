@@ -61,10 +61,36 @@ class MHC_OT_CreateClothesOperator(bpy.types.Operator):
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
 
         #
-        # in case that the human has shape keys, remove this one by one
-        # so that the last one will be accepted
+        # create filename and check if already existent
+        #
+        subdir = context.scene.MHClothesDestination
+        rootDir = getClothesRoot(subdir)
+        name = clothesObj.MhClothesName
+
+        filename = os.path.join(rootDir,name)
+        if context.scene.MHOverwrite is False and os.path.isdir(filename):
+            bpy.ops.info.warningbox('INVOKE_DEFAULT', title="This path is already existent, to overwrite change common settings of MakeClothes", info=filename)
+            self.report({'ERROR'}, "no clothes created.")
+            return {'FINISHED'}
+
+        #
+        # do the checks before shape key is destroyed
+        #
+        (b, info, error) = checkSanityClothes(clothesObj, humanObj)
+        if b:
+            bpy.ops.info.infobox('INVOKE_DEFAULT', title="Check Clothes", info=info, error=error)
+            self.report({'ERROR'}, "no clothes created.")
+            return {'FINISHED'}
+
+        # all checks done
+
+        #
+        # in case that the human has shape keys,
+        # add a new one as a mix of all and then remove these one by one
+        # so that the last one with its value will be accepted
         #
         if  humanObj.data.shape_keys is not None:
+            humanObj.shape_key_add(name=str(obj.active_shape_key.name)+"_applied", from_mix=True)
             n = len (humanObj.data.shape_keys.key_blocks)
             obj.active_shape_key_index = 0
             for i in range(0, n):
@@ -77,24 +103,6 @@ class MHC_OT_CreateClothesOperator(bpy.types.Operator):
         context.scene.objects.active = clothesObj
         bpy.ops.object.mode_set(mode='OBJECT')
         bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
-
-        #
-        # create filename and check if already existent
-        subdir = context.scene.MHClothesDestination
-        rootDir = getClothesRoot(subdir)
-        name = clothesObj.MhClothesName
-
-        filename = os.path.join(rootDir,name)
-        if context.scene.MHOverwrite is False and os.path.isdir(filename):
-            bpy.ops.info.warningbox('INVOKE_DEFAULT', title="This path is already existent, to overwrite change common settings of MakeClothes", info=filename)
-            self.report({'ERROR'}, "no clothes created.")
-            return {'FINISHED'}
-
-        (b, info, error) = checkSanityClothes(clothesObj, humanObj)
-        if b:
-            bpy.ops.info.infobox('INVOKE_DEFAULT', title="Check Clothes", info=info, error=error)
-            self.report({'ERROR'}, "no clothes created.")
-            return {'FINISHED'}
 
         desc = clothesObj.MhClothesDesc
         license = context.scene.MhClothesLicense
