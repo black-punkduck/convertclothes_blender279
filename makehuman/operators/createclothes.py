@@ -90,9 +90,9 @@ class MHC_OT_CreateClothesOperator(bpy.types.Operator):
         # so that the last one with its value will be accepted
         #
         if  humanObj.data.shape_keys is not None:
-            humanObj.shape_key_add(name=str(obj.active_shape_key.name)+"_applied", from_mix=True)
+            humanObj.shape_key_add(name=str(humanObj.active_shape_key.name)+"_applied", from_mix=True)
             n = len (humanObj.data.shape_keys.key_blocks)
-            obj.active_shape_key_index = 0
+            humanObj.active_shape_key_index = 0
             for i in range(0, n):
                 bpy.ops.object.shape_key_remove(all=False)
 
