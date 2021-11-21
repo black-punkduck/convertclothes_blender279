@@ -44,6 +44,8 @@ class MHC_PT_MakeClothesPanel(bpy.types.Panel):
         row = col.row()
         row.prop(scn, 'MHAllowMods', text="Allow modifiers")
         row = col.row()
+        row.prop(scn, 'MHDebugFile', text="Save additional debug file")
+        row = col.row()
         row.label(text="License")
         row.prop(scn, 'MhClothesLicense', text="")
         row = col.row()
